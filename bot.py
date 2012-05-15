@@ -5,6 +5,8 @@ import time
 import tempfile
 import autopy
 import Image
+import learn_board as lb
+#import sys
 
 
 BOX = (379, 398, 702, 715)  # top x, y, bottom x, y of the board
@@ -69,6 +71,7 @@ def can_destroy(board):
 
 def find_valid_move(b):
     "Find a valid move"
+    print b
     for row in range(6):
         for col in range(6):
             b[row][col], b[row + 1][col] = b[row + 1][col], b[row][col]
@@ -81,18 +84,22 @@ def find_valid_move(b):
                 return (row, col, 'right')
             # Rollback
             b[row][col], b[row][col + 1] = b[row][col + 1], b[row][col]
-    return None
+    return (0, 0, 'down')
 
 
 def apply_move(row, col, direction):
-    autopy.mouse.move(BOX[0] + START_X + 40 * col, BOX[1] + START_Y + 40 * row)
+    autopy.mouse.move(BOX[0] + 20 + 40 * col, BOX[1] + 20 + 40 * row)
+    time.sleep(0.1)
     autopy.mouse.click()
+    time.sleep(0.1)
     if direction == 'down':
-        autopy.mouse.move(BOX[0] + START_X + 40 * col,
-                BOX[1] + START_Y + 40 * (row + 1))
+        autopy.mouse.move(BOX[0] + 20 + 40 * col,
+                BOX[1] + 20 + 40 * (row + 1))
     if direction == 'right':
-        autopy.mouse.move(BOX[0] + START_X + 40 * (col + 1),
-                BOX[1] + START_Y + 40 * row)
+        autopy.mouse.move(BOX[0] + 20 + 40 * (col + 1),
+                BOX[1] + 20 + 40 * row)
+    time.sleep(0.1)
+    autopy.mouse.click()
 
 
 def run():
@@ -104,15 +111,22 @@ def run():
     #    if cl in c_list:
     #        print "!", cl
 
-    while True:
-        grab_screen()
-        time.sleep(1)
-    #while(True):
-    #    im = grab_screen()
-    #    board = parse_screen(im)
-    #    row, col, direction = find_valid_move(board)
-    #    apply_move(row, col, direction)
+    #while True:
+    #    grab_screen()
     #    time.sleep(0.1)
+    b = lb.Board()
+    f = open('trained', 'r')
+    b.load(f)
+    while(True):
+        im = grab_screen()
+        board = b.get_board(im)
+        #board = parse_screen(im)
+        #print board
+        #sys.exit()
+        row, col, direction = find_valid_move(board)
+        print row, col, direction
+        apply_move(row, col, direction)
+        time.sleep(0.1)
 
 
 if __name__ == '__main__':

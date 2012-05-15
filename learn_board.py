@@ -5,6 +5,70 @@ import numpy as np
 #import ImageOps
 #import sys
 from itertools import chain
+import pickle
+
+
+class Board:
+    def __init__(self):
+        pass
+
+    def dump(self, f):
+        pickle.dump(self.clf, f)
+
+    def load(self, f):
+        self.clf = pickle.load(f)
+
+    def learn(self, X, Y):
+        if not hasattr(self, 'clf'):
+            self.clf = svm.SVC()
+        self.clf.fit(X, Y)
+
+    def predict(self, X):
+        return self.clf.predict(X)
+
+    def get_board(self, im):
+        X = []
+        for y in range(8):
+            tmp = []
+            for x in range(8):
+                GRID = (40 * x, 40 * y, 40 * (x + 1), 40 * (y + 1))
+                grid = im.crop(GRID)
+                pixels = grid.load()
+                data = []
+                for i in range(1, 3):
+                    for j in range(1, 3):
+                        tot = (0, 0, 0)
+                        for k in range(10):
+                            for l in range(10):
+                                tot = map(sum,
+                                        zip(tot,
+                                            pixels[10 * i + k, 10 * j + l]))
+                        # For testing picked color
+                        rgb = tuple(map(lambda x: x / 100, tot))
+                        data.append(rgb)
+                        for k in range(5):
+                            for l in range(5):
+                                pixels[10 * i + k, 10 * j + l] = rgb
+                data = list(chain.from_iterable(data))
+                pixels = np.array(data)
+                result = self.clf.predict(pixels)
+                grid.save(str(result) + '_' + str(x) + "_" + str(y) + '.png')
+                tmp.append(COLORS[int(result)])
+            X.append(tmp)
+        return X
+
+
+COLORS = {
+        1: 'green',
+        2: 'blue',
+        3: 'white',
+        4: 'orange',
+        5: 'yellow',
+        6: 'red',
+        7: 'purple',
+        8: '?',
+        }
+
 
 classes = {
         'G': 1,
@@ -35,8 +99,8 @@ def parse_data(im, c):
             grid = im.crop(GRID)
             pixels = grid.load()
             data = []
-            for i in range(4):
-                for j in range(4):
+            for i in range(1, 3):
+                for j in range(1, 3):
                     tot = (0, 0, 0)
                     for k in range(10):
                         for l in range(10):
@@ -83,26 +147,45 @@ def run(PATH):
                     d.append(row.split())
                 data.append((im, d))
 
-    count = 0
+    #count = 0
     train_X = []
     train_Y = []
-    test_images = ''
+    #test_images = ''
     for im, dat in data:
-        if count == 0:
-            test_images = im
-            test_X, test_Y = parse_data(im, dat)
-            count += 1
-            continue
+        #if count == 0:
+        #    test_images = im
+        #    test_X, test_Y = parse_data(im, dat)
+        #    count += 1
+        #    continue
         temp_X, temp_Y = parse_data(im, dat)
+        #test_images = im
         train_X += temp_X
         train_Y += temp_Y
 
-    clf = learn_board(train_X, train_Y)
-    prediction = test_board(clf, test_X)
+    f = open('trained', 'w')
+    b = Board()
+    b.learn(train_X, train_Y)
+    b.dump(f)
+
+    #clf = learn_board(train_X, train_Y)
+    #f = open('trained', 'w')
+    #pickle.dump(clf, f)
+    #print b.get_board(test_images)
+    #print [COLORS[int(x)] for x in test_Y]
+    #print [COLORS[int(x)] for x in temp_Y]
+    #clf = pickle.load(f)
+    #prediction = test_board(clf, test_X)
 
     #print_image(test_images, prediction)
 
 
 if __name__ == '__main__':
-    PATH = 'learn'
-    run(PATH)
+    #PATH = 'learn'
+    #run(PATH)
+
+    f = open('trained', 'r')
+    b = Board()
+    b.load(f)
+
+    image = Image.open('snapshot_1337115240.png')
+    print b.get_board(image)
