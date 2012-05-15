@@ -7,7 +7,7 @@ import autopy
 import Image
 
 
-BOX = (212, 348, 722, 767)  # top x, y, bottom x, y
+BOX = (379, 398, 702, 715)  # top x, y, bottom x, y of the board
 START_X = 188
 START_Y = 63  # Grid starting position in pixel.
 GRID = 40  # Single grid dimension. 40 x 40 pixel
@@ -20,6 +20,7 @@ ORANGE = (254, 251, 130)
 YELLOW = (254, 254, 54)
 RED = (254, 38, 75)
 PURPLE = (254, 124, 254)
+#G=1, B=2, W=3, O=4, Y=5, R=6, P=7, Nothing=0
 
 COLORS = {
         (94, 254, 141): 'green',
