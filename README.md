@@ -4,10 +4,13 @@ Bejeweld Blitz Bot
 Usage
 -----
 For training the block image classifier,
+
     $ python learn_board.py
+
 This drops a file named `trained`.
 
 At the beginning of the game, run the following script.
+
     $ python bot.py
 
 
