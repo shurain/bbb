@@ -97,14 +97,15 @@ def apply_move(row, col, direction):
 
 
 def run():
-    b = lb.Classifier()
+    b = lb.Board()
+    bp = lb.BoardParser
     f = open('trained', 'r')
     b.load(f)
     begin = time.time()
     count = 0
     while(True):
         im = grab_screen()
-        board = b.get_board(im)
+        board = bp.get_board(im, b)
         valid_moves = find_valid_move(board)
         if not valid_moves:
             count += 1
