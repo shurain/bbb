@@ -1,10 +1,9 @@
 import os
-from sklearn import svm
-import Image
-#import ImageOps
 from itertools import chain
 import pickle
-#import time
+
+from sklearn import svm
+import Image
 
 
 class Board:

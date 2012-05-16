@@ -64,20 +64,6 @@ def find_valid_move(b):
             # Rollback
             b[row][col], b[row][col + 1] = b[row][col + 1], b[row][col]
 
-    #for row in range(7):
-    #    if '*' in b[row]:
-    #        valid_moves.append(row, b[row].index('*'), 'down')
-    #    for col in range(7):
-    #        b[row][col], b[row + 1][col] = b[row + 1][col], b[row][col]
-    #        if can_destroy(b):
-    #            valid_moves.append((row, col, 'down'))
-    #        # Rollback
-    #        b[row][col], b[row + 1][col] = b[row + 1][col], b[row][col]
-    #        b[row][col], b[row][col + 1] = b[row][col + 1], b[row][col]
-    #        if can_destroy(b):
-    #            valid_moves.append((row, col, 'right'))
-    #        # Rollback
-    #        b[row][col], b[row][col + 1] = b[row][col + 1], b[row][col]
     return valid_moves
 
 
