@@ -29,11 +29,13 @@ def grab_screen():
 def can_destroy(board):
     "Find 3 or more consecutive blocks"
     for x in range(6):
-        for y in range(6):
-            if board[x][y] == board[x][y + 1] == board[x][y + 2]:
+        for y in range(8):
+            if board[x][y] == board[x + 1][y] == board[x + 2][y]:
                 if board[x][y] != '?':
                     return True
-            if board[x][y] == board[x + 1][y] == board[x + 2][y]:
+    for x in range(8):
+        for y in range(6):
+            if board[x][y] == board[x][y + 1] == board[x][y + 2]:
                 if board[x][y] != '?':
                     return True
     return False
@@ -43,17 +45,39 @@ def find_valid_move(b):
     "Find a valid move"
     valid_moves = []
     for row in range(7):
-        for col in range(7):
+        if '*' in b[row]:
+            valid_moves.append((row, b[row].index('*'), 'down'))
+        for col in range(8):
             b[row][col], b[row + 1][col] = b[row + 1][col], b[row][col]
             if can_destroy(b):
                 valid_moves.append((row, col, 'down'))
             # Rollback
             b[row][col], b[row + 1][col] = b[row + 1][col], b[row][col]
+
+    for row in range(8):
+        if '*' in b[row]:
+            valid_moves.append((row, b[row].index('*'), 'right'))
+        for col in range(7):
             b[row][col], b[row][col + 1] = b[row][col + 1], b[row][col]
             if can_destroy(b):
                 valid_moves.append((row, col, 'right'))
             # Rollback
             b[row][col], b[row][col + 1] = b[row][col + 1], b[row][col]
+
+    #for row in range(7):
+    #    if '*' in b[row]:
+    #        valid_moves.append(row, b[row].index('*'), 'down')
+    #    for col in range(7):
+    #        b[row][col], b[row + 1][col] = b[row + 1][col], b[row][col]
+    #        if can_destroy(b):
+    #            valid_moves.append((row, col, 'down'))
+    #        # Rollback
+    #        b[row][col], b[row + 1][col] = b[row + 1][col], b[row][col]
+    #        b[row][col], b[row][col + 1] = b[row][col + 1], b[row][col]
+    #        if can_destroy(b):
+    #            valid_moves.append((row, col, 'right'))
+    #        # Rollback
+    #        b[row][col], b[row][col + 1] = b[row][col + 1], b[row][col]
     return valid_moves
 
 
@@ -73,7 +97,7 @@ def apply_move(row, col, direction):
 
 
 def run():
-    b = lb.Board()
+    b = lb.Classifier()
     f = open('trained', 'r')
     b.load(f)
     begin = time.time()
@@ -86,11 +110,13 @@ def run():
             count += 1
             if count > 10:
                 im.save('snapshot_' + str(int(time.time())) + '.png')
+                print board
                 sys.exit()
             continue
         count = 0
         random.shuffle(valid_moves)
-        for row, col, direction in valid_moves[:5]:
+        #for row, col, direction in valid_moves[:5]:
+        for row, col, direction in valid_moves:
             apply_move(row, col, direction)
         cur = time.time()
         if cur - begin > 63:
