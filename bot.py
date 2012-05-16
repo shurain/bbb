@@ -6,33 +6,12 @@ import tempfile
 import autopy
 import Image
 import learn_board as lb
-#import sys
+import random
+import sys
 
 
 BOX = (379, 398, 702, 715)  # top x, y, bottom x, y of the board
-START_X = 188
-START_Y = 63  # Grid starting position in pixel.
-GRID = 40  # Single grid dimension. 40 x 40 pixel
-BOARD = 8  # Whole board. 8 x 8
-
-GREEN = (94, 254, 141)
-BLUE = (27, 135, 254)
-WHITE = (254, 254, 254)
-ORANGE = (254, 251, 130)
-YELLOW = (254, 254, 54)
-RED = (254, 38, 75)
-PURPLE = (254, 124, 254)
 #G=1, B=2, W=3, O=4, Y=5, R=6, P=7, Nothing=0
-
-COLORS = {
-        (94, 254, 141): 'green',
-        (27, 135, 254): 'blue',
-        (254, 254, 254): 'white',
-        (254, 251, 130): 'orange',
-        (254, 254, 54): 'yellow',
-        (254, 38, 75): 'red',
-        (254, 124, 254): 'purple',
-        }
 
 
 def grab_screen():
@@ -42,20 +21,9 @@ def grab_screen():
     os.system("screencapture -x -T 0 " + filepath)
     image = Image.open(filepath)
     im = image.crop(BOX)
-    im.save('snapshot_' + timestamp + '.png')
+    #if random.random() > .95:
+    #    im.save('snapshot_' + timestamp + '.png')
     return im
-
-
-def parse_screen(im):
-    pix = im.load()
-    board = []
-    for y in range(BOARD):
-        row = []
-        for x in range(BOARD):
-            tmp = pix[(START_X + 40 * x, START_Y + 40 * y)]
-            row.append(COLORS[tmp])
-        board.append(row)
-    return board
 
 
 def can_destroy(board):
@@ -63,70 +31,70 @@ def can_destroy(board):
     for x in range(6):
         for y in range(6):
             if board[x][y] == board[x][y + 1] == board[x][y + 2]:
-                return True
+                if board[x][y] != '?':
+                    return True
             if board[x][y] == board[x + 1][y] == board[x + 2][y]:
-                return True
+                if board[x][y] != '?':
+                    return True
     return False
 
 
 def find_valid_move(b):
     "Find a valid move"
-    print b
-    for row in range(6):
-        for col in range(6):
+    valid_moves = []
+    for row in range(7):
+        for col in range(7):
             b[row][col], b[row + 1][col] = b[row + 1][col], b[row][col]
             if can_destroy(b):
-                return (row, col, 'down')
+                valid_moves.append((row, col, 'down'))
             # Rollback
             b[row][col], b[row + 1][col] = b[row + 1][col], b[row][col]
             b[row][col], b[row][col + 1] = b[row][col + 1], b[row][col]
             if can_destroy(b):
-                return (row, col, 'right')
+                valid_moves.append((row, col, 'right'))
             # Rollback
             b[row][col], b[row][col + 1] = b[row][col + 1], b[row][col]
-    return (0, 0, 'down')
+    return valid_moves
 
 
 def apply_move(row, col, direction):
     autopy.mouse.move(BOX[0] + 20 + 40 * col, BOX[1] + 20 + 40 * row)
-    time.sleep(0.1)
+    time.sleep(0.01)
     autopy.mouse.click()
-    time.sleep(0.1)
+    time.sleep(0.01)
     if direction == 'down':
         autopy.mouse.move(BOX[0] + 20 + 40 * col,
                 BOX[1] + 20 + 40 * (row + 1))
     if direction == 'right':
         autopy.mouse.move(BOX[0] + 20 + 40 * (col + 1),
                 BOX[1] + 20 + 40 * row)
-    time.sleep(0.1)
+    time.sleep(0.01)
     autopy.mouse.click()
 
 
 def run():
-    #im = Image.open('snapshot_1337025932.png')
-    #c_list = im.crop((168, 50, 168+40, 50+40)).getcolors(1024)
-    #print c_list
-    #for cl in COLORS:
-    #    print cl
-    #    if cl in c_list:
-    #        print "!", cl
-
-    #while True:
-    #    grab_screen()
-    #    time.sleep(0.1)
     b = lb.Board()
     f = open('trained', 'r')
     b.load(f)
+    begin = time.time()
+    count = 0
     while(True):
         im = grab_screen()
         board = b.get_board(im)
-        #board = parse_screen(im)
-        #print board
-        #sys.exit()
-        row, col, direction = find_valid_move(board)
-        print row, col, direction
-        apply_move(row, col, direction)
-        time.sleep(0.1)
+        valid_moves = find_valid_move(board)
+        if not valid_moves:
+            count += 1
+            if count > 10:
+                im.save('snapshot_' + str(int(time.time())) + '.png')
+                sys.exit()
+            continue
+        count = 0
+        random.shuffle(valid_moves)
+        for row, col, direction in valid_moves[:5]:
+            apply_move(row, col, direction)
+        cur = time.time()
+        if cur - begin > 63:
+            break
 
 
 if __name__ == '__main__':

@@ -6,6 +6,7 @@ import numpy as np
 #import sys
 from itertools import chain
 import pickle
+import time
 
 
 class Board:
@@ -46,13 +47,16 @@ class Board:
                         # For testing picked color
                         rgb = tuple(map(lambda x: x / 100, tot))
                         data.append(rgb)
-                        for k in range(5):
-                            for l in range(5):
-                                pixels[10 * i + k, 10 * j + l] = rgb
+                        #for k in range(5):
+                        #    for l in range(5):
+                        #        pixels[10 * i + k, 10 * j + l] = rgb
                 data = list(chain.from_iterable(data))
                 pixels = np.array(data)
                 result = self.clf.predict(pixels)
-                grid.save(str(result) + '_' + str(x) + "_" + str(y) + '.png')
+                grid.save(str(int(result)) + "_"
+                        + str(int(time.time())) + '.png')
+                #grid.save(str(int(result)) + '_' +
+                #        str(x) + "_" + str(y) + '.png')
                 tmp.append(COLORS[int(result)])
             X.append(tmp)
         return X
@@ -79,6 +83,7 @@ classes = {
         'R': 6,
         'P': 7,
         '?': 8,
+        '*': 9,
         }
 
 
@@ -87,7 +92,7 @@ def print_image(im, c):
         for x in range(8):
             GRID = (40 * x, 40 * y, 40 * (x + 1), 40 * (y + 1))
             grid = im.crop(GRID)
-            grid.save(str(c[8 * y + x]) + "_" + str(x) + "_" + str(y) + '.png')
+            grid.save(str(c[8 * y + x]) + "_" + str(int(time.time())) + '.png')
 
 
 def parse_data(im, c):
@@ -180,12 +185,12 @@ def run(PATH):
 
 
 if __name__ == '__main__':
-    #PATH = 'learn'
-    #run(PATH)
+    PATH = 'learn'
+    run(PATH)
 
-    f = open('trained', 'r')
-    b = Board()
-    b.load(f)
+    #f = open('trained', 'r')
+    #b = Board()
+    #b.load(f)
 
-    image = Image.open('snapshot_1337115240.png')
-    print b.get_board(image)
+    #image = Image.open('snapshot_1337115240.png')
+    #print b.get_board(image)
