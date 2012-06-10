@@ -1,0 +1,6 @@
+git+https://github.com/brynmathias/autopy.git
+PIL==1.1.7
+autopy==0.51
+numpy==1.6.2
+scikit-learn==0.11
+wsgiref==0.1.2

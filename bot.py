@@ -6,11 +6,12 @@ import tempfile
 import autopy
 import Image
 import learn_board as lb
-#import random
+import random
 import sys
 
 
-BOX = (379, 398, 702, 715)  # top x, y, bottom x, y of the board
+BOX = (180, 476, 180+323, 476+317) # (379, 398, 702, 715)  # top x, y, bottom x, y of the board
+#BOX = (379, 398, 702, 715)  # top x, y, bottom x, y of the board
 #G=1, B=2, W=3, O=4, Y=5, R=6, P=7, Nothing=0
 
 
@@ -22,7 +23,7 @@ def grab_screen():
     image = Image.open(filepath)
     im = image.crop(BOX)
     #if random.random() > .95:
-    #    im.save('snapshot_' + timestamp + '.png')
+        #im.save('snapshot_' + timestamp + '.png')
     return im
 
 
@@ -189,7 +190,7 @@ def run():
         valid_moves.sort(reverse=True)
         #random.shuffle(valid_moves)
         for k, row, col, direction in valid_moves[:4]:
-        #for row, col, direction in valid_moves[:1]:
+        #for row, col, direction in valid_moves[:3]:
             #print board
             print k, row, col, direction
             #print row, col, direction
